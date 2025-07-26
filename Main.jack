@@ -1,7 +1,45 @@
 class Main {
     function void main() {
+        var char currentKey;
+        var char previousKey;
+        var boolean keyJustPressed;
+        var boolean keyJustReleased;
+        var boolean exit;
+        var Array joids;
+
         var Vector2 position;
         var Joid j;
+
+        do Output.printString("Press 'j' to add a joid.");
+        do Output.println();
+        do Output.printString("Press 'k' to remove a joid.");
+        do Output.println();
+        do Output.printString("Press 'q' to quit.");
+
+        let exit = false;
+        let joids = Array.new(20);
+        while (~exit) {
+            let previousKey = currentKey;
+            let currentKey = Keyboard.keyPressed();
+
+            let keyJustPressed = (previousKey = 0) & (~(currentKey = 0));
+            let keyJustReleased = (~(previousKey = 0)) & (currentKey = 0);
+
+            if (keyJustReleased) {
+                if (previousKey = 113) { // Quit
+                    let exit = true;
+                }
+                if (previousKey = 106) { // Add joid
+                    do Screen.clearScreen();
+                    do Output.printString("Added!");
+                }
+                if (previousKey = 107) { // Remove joid
+                    do Screen.clearScreen();
+                    do Output.printString("Removed!");
+                }
+            }
+        }
+
         let position = Vector2.new(256, 128);
         let j = Joid.new(position);
         
