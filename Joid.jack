@@ -5,26 +5,29 @@ class Joid {
 
     constructor Joid new(Vector2 aposition) {
         let position = aposition;
-        let velocity = Vector2.new(3,3);
+        let velocity = Vector2.new(2,2);
         let size = 10;
         return this;
     }
 
     method void update() {
         var Vector2 newPosition;
-        
         let newPosition = position.add(velocity);
+        do position.dispose();
         let position = newPosition;
+        return;
+    }
 
-        do newPosition.dispose();
-
+    method void clear() {
+        do Screen.setColor(false);
+        do Screen.drawRectangle(position.getX(),position.getY(),position.getX()+size,position.getY()+size);
         return;
     }
 
     method void draw() {
         // Screen: 256 rows of 512 pixels, black and white
         // Horizontal wrap right edge
-        if ((position.getX()+size) > 512) {
+        if ((position.getX()+size) > 510) {
             do position.setX(0);
         }
 
@@ -42,16 +45,18 @@ class Joid {
         if ((position.getY()) < 0) {
             do position.setY(256-size);
         }
-
-        // Clear
-        do Screen.clearScreen();
-
+        
         // Draw
         do Screen.setColor(true);
         do Screen.drawRectangle(position.getX(),position.getY(),position.getX()+size,position.getY()+size);
 
-        do Sys.wait(5);
+        return;
+    }
 
+    method void dispose() {
+        do position.dispose();
+        do velocity.dispose();
+        do Memory.deAlloc(this);
         return;
     }
 }

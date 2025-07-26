@@ -5,24 +5,26 @@ class Main {
         var boolean keyJustPressed;
         var boolean keyJustReleased;
         var boolean exit;
+        var boolean screenCleared;
         var Array joids;
         var int currentJoidsCount;
         var int currentJoid;
-
+        var int maxJoidsCount;
         var Joid joid;
-        var Vector2 position;
-        let position = Vector2.new(256, 128);
+
+        let exit = false;
+        let screenCleared = false;
+        let currentJoidsCount = 0;
+        let currentJoid = 0;
+        let maxJoidsCount = 30;
+        let joids = Array.new(maxJoidsCount);
 
         do Output.printString("Press 'j' to add a joid.");
         do Output.println();
         do Output.printString("Press 'k' to remove a joid.");
         do Output.println();
         do Output.printString("Press 'q' to quit.");
-
-        let exit = false;
-        let joids = Array.new(20);
-        let currentJoidsCount = 0;
-        let currentJoid = 0;
+        
         while (~exit) {
             let previousKey = currentKey;
             let currentKey = Keyboard.keyPressed();
@@ -31,25 +33,45 @@ class Main {
             let keyJustReleased = (~(previousKey = 0)) & (currentKey = 0);
 
             if (keyJustReleased) {
-                if (previousKey = 106) { // Add joid
+                if (~screenCleared) {
                     do Screen.clearScreen();
-                    do Output.printString("Added!");
-                    
-                    let joids[currentJoidsCount] = Joid.new(position);
-                    let currentJoidsCount = currentJoidsCount + 1;
-                    do Output.printInt(currentJoidsCount);
+                    let screenCleared = true;
+                }
+                if (previousKey = 106) { // Add joid
+                    if (currentJoidsCount < maxJoidsCount) {
+                        let joids[currentJoidsCount] = Joid.new(Vector2.new(256, 128));
+                        let currentJoidsCount = currentJoidsCount + 1;
+                    }
                 }
                 if (previousKey = 107) { // Remove joid
-                    do Screen.clearScreen();
-                    do Output.printString("Removed!");
+                    if (currentJoidsCount > 0) {
+                        let currentJoidsCount = currentJoidsCount - 1;
+                        let joid = joids[currentJoidsCount];
+                        do joid.clear();
+                        do joid.dispose();
+                    }
                 }
                 if (previousKey = 113) { // Quit
+                    while (currentJoidsCount > 0) {
+                        let currentJoidsCount = currentJoidsCount - 1;
+                        let joid = joids[currentJoidsCount];
+                        do joid.dispose();
+                    }
+                    do joids.dispose();
+
                     let exit = true;
+                    do Screen.clearScreen();
                 }
+
+                do Output.moveCursor(1,1);
+                do Output.printInt(currentJoidsCount);
+                do Output.printString("/");
+                do Output.printInt(maxJoidsCount);
             }
 
             while (currentJoid < currentJoidsCount) {
                 let joid = joids[currentJoid];
+                do joid.clear();
                 do joid.update();
                 do joid.draw();
                 let currentJoid = currentJoid + 1;
@@ -57,6 +79,8 @@ class Main {
             if (currentJoid = currentJoidsCount) {
                 let currentJoid = 0;
             }
+            
+            do Sys.wait(1);
         }
 
         return;
