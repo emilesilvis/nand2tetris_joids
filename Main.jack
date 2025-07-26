@@ -6,9 +6,12 @@ class Main {
         var boolean keyJustReleased;
         var boolean exit;
         var Array joids;
+        var int currentJoidsCount;
+        var int currentJoid;
 
+        var Joid joid;
         var Vector2 position;
-        var Joid j;
+        let position = Vector2.new(256, 128);
 
         do Output.printString("Press 'j' to add a joid.");
         do Output.println();
@@ -18,6 +21,8 @@ class Main {
 
         let exit = false;
         let joids = Array.new(20);
+        let currentJoidsCount = 0;
+        let currentJoid = 0;
         while (~exit) {
             let previousKey = currentKey;
             let currentKey = Keyboard.keyPressed();
@@ -26,27 +31,34 @@ class Main {
             let keyJustReleased = (~(previousKey = 0)) & (currentKey = 0);
 
             if (keyJustReleased) {
-                if (previousKey = 113) { // Quit
-                    let exit = true;
-                }
                 if (previousKey = 106) { // Add joid
                     do Screen.clearScreen();
                     do Output.printString("Added!");
+                    
+                    let joids[currentJoidsCount] = Joid.new(position);
+                    let currentJoidsCount = currentJoidsCount + 1;
+                    do Output.printInt(currentJoidsCount);
                 }
                 if (previousKey = 107) { // Remove joid
                     do Screen.clearScreen();
                     do Output.printString("Removed!");
                 }
+                if (previousKey = 113) { // Quit
+                    let exit = true;
+                }
+            }
+
+            while (currentJoid < currentJoidsCount) {
+                let joid = joids[currentJoid];
+                do joid.update();
+                do joid.draw();
+                let currentJoid = currentJoid + 1;
+            }
+            if (currentJoid = currentJoidsCount) {
+                let currentJoid = 0;
             }
         }
 
-        let position = Vector2.new(256, 128);
-        let j = Joid.new(position);
-        
-        while(true) {
-            do j.update();
-            do j.draw();
-        }
         return;
    }
 }
