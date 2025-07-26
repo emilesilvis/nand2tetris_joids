@@ -1,0 +1,57 @@
+class Joid {
+    field int size;
+    field Vector2 position;
+    field Vector2 velocity;
+
+    constructor Joid new(Vector2 aposition) {
+        let position = aposition;
+        let velocity = Vector2.new(3,3);
+        let size = 10;
+        return this;
+    }
+
+    method void update() {
+        var Vector2 newPosition;
+        
+        let newPosition = position.add(velocity);
+        let position = newPosition;
+
+        do newPosition.dispose();
+
+        return;
+    }
+
+    method void draw() {
+        // Screen: 256 rows of 512 pixels, black and white
+        // Horizontal wrap right edge
+        if ((position.getX()+size) > 512) {
+            do position.setX(0);
+        }
+
+        // Horizontal wrap left edge
+        if ((position.getX()) < 0) {
+            do position.setX(512-size);
+        }
+
+        // Vertical wrap bottom edge
+        if ((position.getY()+size) > 256) {
+            do position.setY(0);
+        }
+
+        // Vertical wrap top edge
+        if ((position.getY()) < 0) {
+            do position.setY(256-size);
+        }
+
+        // Clear
+        do Screen.clearScreen();
+
+        // Draw
+        do Screen.setColor(true);
+        do Screen.drawRectangle(position.getX(),position.getY(),position.getX()+size,position.getY()+size);
+
+        do Sys.wait(5);
+
+        return;
+    }
+}

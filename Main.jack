@@ -1,0 +1,14 @@
+class Main {
+    function void main() {
+        var Vector2 position;
+        var Joid j;
+        let position = Vector2.new(256, 128);
+        let j = Joid.new(position);
+        
+        while(true) {
+            do j.update();
+            do j.draw();
+        }
+        return;
+   }
+}
