@@ -21,10 +21,20 @@ class Joid {
     method void clear() {
         do Screen.setColor(false);
         do Screen.drawRectangle(position.getX(),position.getY(),position.getX()+size,position.getY()+size);
+
         return;
     }
 
     method void draw() {
+        // Draw
+        do calculateScreenWrap();
+        do Screen.setColor(true);
+        do Screen.drawRectangle(position.getX(),position.getY(),position.getX()+size,position.getY()+size);
+
+        return;
+    }
+
+    method void calculateScreenWrap() {
         // Screen: 256 rows of 512 pixels, black and white
         // Horizontal wrap right edge
         if ((position.getX()+size) > 510) {
@@ -45,10 +55,6 @@ class Joid {
         if ((position.getY()) < 0) {
             do position.setY(256-size);
         }
-        
-        // Draw
-        do Screen.setColor(true);
-        do Screen.drawRectangle(position.getX(),position.getY(),position.getX()+size,position.getY()+size);
 
         return;
     }
