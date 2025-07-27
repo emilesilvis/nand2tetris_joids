@@ -1,88 +1,56 @@
 class Main {
     function void main() {
-        var char currentKey;
-        var char previousKey;
-        var boolean keyJustPressed;
-        var boolean keyJustReleased;
+        var InterfaceController interfaceController;
+        var JoidsController joidsController;
+        var int action;
         var boolean exit;
-        var boolean screenCleared;
-        var Array joids;
-        var int currentJoidsCount;
-        var int currentJoid;
-        var int maxJoidsCount;
-        var Joid joid;
 
-        let exit = false;
-        let screenCleared = false;
-        let currentJoidsCount = 0;
-        let currentJoid = 0;
-        let maxJoidsCount = 30;
-        let joids = Array.new(maxJoidsCount);
-
-        do Output.printString("Press 'j' to add a joid.");
-        do Output.println();
-        do Output.printString("Press 'k' to remove a joid.");
-        do Output.println();
-        do Output.printString("Press 'q' to quit.");
+        // Initialize action constants
+        do InterfaceController.initializeActions();
         
+        // Create controllers
+        let interfaceController = InterfaceController.new();
+        let joidsController = JoidsController.new(30);
+        let exit = false;
+
+        // Display initial instructions
+        do interfaceController.displayInstructions();
+        
+        // Main game loop
         while (~exit) {
-            let previousKey = currentKey;
-            let currentKey = Keyboard.keyPressed();
+            let action = interfaceController.checkInput();
 
-            let keyJustPressed = (previousKey = 0) & (~(currentKey = 0));
-            let keyJustReleased = (~(previousKey = 0)) & (currentKey = 0);
-
-            if (keyJustReleased) {
-                if (~screenCleared) {
-                    do Screen.clearScreen();
-                    let screenCleared = true;
-                }
-                if (previousKey = 106) { // Add joid
-                    if (currentJoidsCount < maxJoidsCount) {
-                        let joids[currentJoidsCount] = Joid.new(Vector2.new(256, 128));
-                        let currentJoidsCount = currentJoidsCount + 1;
-                    }
-                }
-                if (previousKey = 107) { // Remove joid
-                    if (currentJoidsCount > 0) {
-                        let currentJoidsCount = currentJoidsCount - 1;
-                        let joid = joids[currentJoidsCount];
-                        do joid.clear();
-                        do joid.dispose();
-                    }
-                }
-                if (previousKey = 113) { // Quit
-                    while (currentJoidsCount > 0) {
-                        let currentJoidsCount = currentJoidsCount - 1;
-                        let joid = joids[currentJoidsCount];
-                        do joid.dispose();
-                    }
-                    do joids.dispose();
-
-                    let exit = true;
-                    do Screen.clearScreen();
-                }
-
-                do Output.moveCursor(1,1);
-                do Output.printInt(currentJoidsCount);
-                do Output.printString("/");
-                do Output.printInt(maxJoidsCount);
+            if (action = 1) { // ADD_JOID
+                do joidsController.addJoid();
+                do interfaceController.displayJoidCount(
+                    joidsController.getCurrentJoidsCount(), 
+                    joidsController.getMaxJoidsCount()
+                );
+            }
+            
+            if (action = 2) { // REMOVE_JOID
+                do joidsController.removeJoid();
+                do interfaceController.displayJoidCount(
+                    joidsController.getCurrentJoidsCount(), 
+                    joidsController.getMaxJoidsCount()
+                );
+            }
+            
+            if (action = 3) { // QUIT
+                do joidsController.cleanup();
+                let exit = true;
+                do Screen.clearScreen();
             }
 
-            while (currentJoid < currentJoidsCount) {
-                let joid = joids[currentJoid];
-                do joid.clear();
-                do joid.update();
-                do joid.draw();
-                let currentJoid = currentJoid + 1;
-            }
-            if (currentJoid = currentJoidsCount) {
-                let currentJoid = 0;
-            }
+            // Update and draw joids
+            do joidsController.updateAndDrawJoids();
             
             do Sys.wait(1);
         }
 
+        // Cleanup
+        do interfaceController.dispose();
+        do joidsController.dispose();
         return;
-   }
+    }
 }

@@ -1,0 +1,96 @@
+class InterfaceController {
+    // Action constants
+    static int NO_ACTION, ADD_JOID, REMOVE_JOID, QUIT;
+    
+    field char currentKey;
+    field char previousKey;
+    field boolean screenCleared;
+
+    constructor InterfaceController new() {
+        let currentKey = 0;
+        let previousKey = 0;
+        let screenCleared = false;
+        return this;
+    }
+
+    function void initializeActions() {
+        let NO_ACTION = 0;
+        let ADD_JOID = 1;
+        let REMOVE_JOID = 2;
+        let QUIT = 3;
+        return;
+    }
+
+    method void displayInstructions() {
+        do Output.printString("A joid is a friendly creature that flies around and has buddies.");
+        do Output.println();
+        do Output.println();
+        do Output.printString("A joid may do as it likes but always follows three rules:");
+        do Output.println();
+        do Output.printString("1. Don't get too close to my buddies!");
+        do Output.println();
+        do Output.printString("2. Steer towards the average position of my buddies!");
+        do Output.println();
+        do Output.printString("3. Match my direction and speed to the average direction and speed of my buddies.");
+        do Output.println();
+        do Output.println();
+        do Output.printString("If all joids follow these three rules, magic happens.");
+        do Output.println();
+        do Output.println();
+        do Output.printString("See for yourself.");
+        do Output.println();
+        do Output.println();
+        do Output.printString("Press 'j' to add a joid.");
+        do Output.println();
+        do Output.printString("Press 'k' to remove a joid.");
+        do Output.println();
+        do Output.printString("Press 'q' to quit.");
+        return;
+    }
+
+    method void displayJoidCount(int current, int max) {
+        do Output.moveCursor(1,1);
+        do Output.printInt(current);
+        do Output.printString("/");
+        do Output.printInt(max);
+        return;
+    }
+
+    method void clearScreenIfNeeded() {
+        if (~screenCleared) {
+            do Screen.clearScreen();
+            let screenCleared = true;
+        }
+        return;
+    }
+
+    method int checkInput() {
+        var boolean keyJustReleased;
+        
+        let previousKey = currentKey;
+        let currentKey = Keyboard.keyPressed();
+
+        let keyJustReleased = (~(previousKey = 0)) & (currentKey = 0);
+
+        if (keyJustReleased) {
+            do clearScreenIfNeeded();
+            
+            if (previousKey = 106) { // 'j' key
+                return ADD_JOID;
+            }
+            if (previousKey = 107) { // 'k' key
+                return REMOVE_JOID;
+            }
+            if (previousKey = 113) { // 'q' key
+                return QUIT;
+            }
+        }
+        
+        return NO_ACTION;
+    }
+
+    method void dispose() {
+        do Memory.deAlloc(this);
+        return;
+    }
+}

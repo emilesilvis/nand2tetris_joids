@@ -1,0 +1,78 @@
+class JoidsController {
+    field Array joids;
+    field int currentJoidsCount;
+    field int maxJoidsCount;
+    field int currentJoidIndex;
+
+    constructor JoidsController new(int maxJoids) {
+        let maxJoidsCount = maxJoids;
+        let currentJoidsCount = 0;
+        let currentJoidIndex = 0;
+        let joids = Array.new(maxJoidsCount);
+        return this;
+    }
+
+    method boolean addJoid() {
+        if (currentJoidsCount < maxJoidsCount) {
+            let joids[currentJoidsCount] = Joid.new(Vector2.new(256, 128));
+            let currentJoidsCount = currentJoidsCount + 1;
+            return true;
+        }
+        return false;
+    }
+
+    method boolean removeJoid() {
+        var Joid joid;
+        
+        if (currentJoidsCount > 0) {
+            let currentJoidsCount = currentJoidsCount - 1;
+            let joid = joids[currentJoidsCount];
+            do joid.clear();
+            do joid.dispose();
+            return true;
+        }
+        return false;
+    }
+
+    method void updateAndDrawJoids() {
+        var Joid joid;
+        var int i;
+        
+        let i = 0;
+        while (i < currentJoidsCount) {
+            let joid = joids[i];
+            do joid.clear();
+            do joid.update(joids);
+            do joid.draw();
+            let i = i + 1;
+        }
+        
+        return;
+    }
+
+    method int getCurrentJoidsCount() {
+        return currentJoidsCount;
+    }
+
+    method int getMaxJoidsCount() {
+        return maxJoidsCount;
+    }
+
+    method void cleanup() {
+        var Joid joid;
+        
+        while (currentJoidsCount > 0) {
+            let currentJoidsCount = currentJoidsCount - 1;
+            let joid = joids[currentJoidsCount];
+            do joid.dispose();
+        }
+        do joids.dispose();
+        return;
+    }
+
+    method void dispose() {
+        do cleanup();
+        do Memory.deAlloc(this);
+        return;
+    }
+}

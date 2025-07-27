@@ -10,7 +10,7 @@ class Joid {
         return this;
     }
 
-    method void update() {
+    method void update(Array joids) {
         var Vector2 newPosition;
         let newPosition = position.add(velocity);
         do position.dispose();
