@@ -15,10 +15,7 @@ class Joid {
     }
 
     method void update(Array joids, int currentJoidsCount) {
-        var Vector2 foo;
         do position.add(velocity);
-        let foo = BoidsCalculator.calculateSeparation(this, joids, currentJoidsCount);
-        do foo.dispose();
         return;
     }    
 
