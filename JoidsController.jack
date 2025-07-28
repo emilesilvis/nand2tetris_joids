@@ -12,9 +12,9 @@ class JoidsController {
         return this;
     }
 
-    method boolean addJoid() {
+    method boolean addJoid(int px, int py, int vx, int vy) {
         if (currentJoidsCount < maxJoidsCount) {
-            let joids[currentJoidsCount] = Joid.new(Vector2.new(256, 128));
+            let joids[currentJoidsCount] = Joid.new(Vector2.new(px, py), Vector2.new(vx, vy));
             let currentJoidsCount = currentJoidsCount + 1;
             return true;
         }

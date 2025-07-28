@@ -3,9 +3,9 @@ class Joid {
     field Vector2 position;
     field Vector2 velocity;
 
-    constructor Joid new(Vector2 aposition) {
+    constructor Joid new(Vector2 aposition, Vector2 avelocity) {
         let position = aposition;
-        let velocity = Vector2.new(2,2);
+        let velocity = avelocity;
         let size = 10;
         return this;
     }
@@ -15,15 +15,12 @@ class Joid {
     }
 
     method void update(Array joids, int currentJoidsCount) {
-        var Vector2 newPosition;
         var Vector2 foo;
-        let newPosition = position.add(velocity);
-        do position.dispose();
-        let position = newPosition;
+        do position.add(velocity);
         let foo = BoidsCalculator.calculateSeparation(this, joids, currentJoidsCount);
         do foo.dispose();
         return;
-    }
+    }    
 
     method void clear() {
         do Screen.setColor(false);
@@ -44,7 +41,7 @@ class Joid {
     method void calculateScreenWrap() {
         // Screen: 256 rows of 512 pixels, black and white
         // Horizontal wrap right edge
-        if ((position.getX()+size) > 510) {
+        if ((position.getX()+size) > 512) {
             do position.setX(0);
         }
 

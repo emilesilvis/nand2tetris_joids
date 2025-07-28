@@ -1,29 +1,5 @@
 /** This class contains functions for implementation the Boids algorithms: https://en.wikipedia.org/wiki/Boids. For my specific implementation, see README.md. */
 
 class BoidsCalculator {
-    function Vector2 calculateSeperation(Joid currentJoid, Array joids, int currentJoidsCount) {
-        var Joid neighbour;
-        var int i;
-        var Vector2 neighbourPosition, displacement;
-        
-        let i = 0;
-        while (i < currentJoidsCount) {
-            let neighbour = joids[i];
-            // 1. Find nearby neighbours // SKIP FOR NOW
-            
-            // 2. For each neighbours, calculate the displacement vectors
-            if (~(currentJoid = neighbour)) {
-                let neighbourPosition = neighbour.getPosition();
-                let displacement = neighbourPosition.subtract(currentJoid.getPosition());
-                do neighbourPosition.dispose();
-                do displacement.dispose();
-            }
-
-            // 3. Take the average of all displacement vectors
-
-            let i = i + 1;
-        }
-        
-        return null;
-    }
+   
 }
