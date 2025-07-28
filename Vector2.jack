@@ -37,6 +37,25 @@ class Vector2 {
         return Vector2.new(x * scalar, y * scalar);
     }
 
+    method Vector2 divide(int scalar) {
+        return Vector2.new(x / scalar, y / scalar);
+    }
+
+    method int magnitude() {
+        return Math.sqrt((x * x) + (y * y));
+    }
+
+    method int distance(Vector2 other) {
+        var Vector2 displacement;
+        var int distance;
+
+        let displacement = subtract(other);
+        let distance = displacement.magnitude();
+        do displacement.dispose();
+
+        return distance;
+    }
+
     method void dispose() {
         do Memory.deAlloc(this);
         return;
