@@ -19,6 +19,14 @@ class Joid {
     method int getPositionY() {
         return positionY;
     }
+    
+    method int getVelocityX() {
+        return velocityX;
+    }
+
+    method int getVelocityY() {
+        return velocityY;
+    }
 
     method void calculateSeparation(Array joids, int currentJoidsCount) {
         var Joid otherJoid;
@@ -74,10 +82,123 @@ class Joid {
         return;
     }
 
+    method void calculateCohesion(Array joids, int currentJoidsCount) {
+        var Joid otherJoid;
+        var int i, dx, dy, distance;
+        var int cohesionX, cohesionY;
+        var int cohesionRange, neighborCount;
+        var int avgX, avgY;
+        
+        let cohesionRange = 50;  // Look for neighbors within this range
+        let cohesionX = 0;
+        let cohesionY = 0;
+        let neighborCount = 0;
+        
+        // Find all neighbors and calculate average position
+        let i = 0;
+        while (i < currentJoidsCount) {
+            let otherJoid = joids[i];
+            
+            // Skip self
+            if (~(otherJoid = this)) {
+                // Calculate distance
+                let dx = positionX - otherJoid.getPositionX();
+                let dy = positionY - otherJoid.getPositionY();
+                let distance = Math.abs(dx) + Math.abs(dy);
+                
+                // If within cohesion range, include in group
+                if (distance < cohesionRange) {
+                    let cohesionX = cohesionX + otherJoid.getPositionX();
+                    let cohesionY = cohesionY + otherJoid.getPositionY();
+                    let neighborCount = neighborCount + 1;
+                }
+            }
+            
+            let i = i + 1;
+        }
+        
+        // If we have neighbors to move towards
+        if (neighborCount > 0) {
+            // Calculate average position (center of mass)
+            let avgX = cohesionX / neighborCount;
+            let avgY = cohesionY / neighborCount;
+            
+            // Calculate direction towards center
+            let dx = avgX - positionX;
+            let dy = avgY - positionY;
+            
+            // Apply cohesion force to velocity (gentle)
+            let velocityX = velocityX + (dx / 100);
+            let velocityY = velocityY + (dy / 100);
+        }
+        
+        return;
+    }
+
+    method void calculateAlignment(Array joids, int currentJoidsCount) {
+        var Joid otherJoid;
+        var int i, dx, dy, distance;
+        var int alignmentX, alignmentY;
+        var int alignmentRange, neighborCount;
+        var int avgVelX, avgVelY;
+        
+        let alignmentRange = 40;  // Look for neighbors within this range
+        let alignmentX = 0;
+        let alignmentY = 0;
+        let neighborCount = 0;
+        
+        // Find all neighbors and calculate average velocity
+        let i = 0;
+        while (i < currentJoidsCount) {
+            let otherJoid = joids[i];
+            
+            // Skip self
+            if (~(otherJoid = this)) {
+                // Calculate distance
+                let dx = positionX - otherJoid.getPositionX();
+                let dy = positionY - otherJoid.getPositionY();
+                let distance = Math.abs(dx) + Math.abs(dy);
+                
+                // If within alignment range, include in group
+                if (distance < alignmentRange) {
+                    let alignmentX = alignmentX + otherJoid.getVelocityX();
+                    let alignmentY = alignmentY + otherJoid.getVelocityY();
+                    let neighborCount = neighborCount + 1;
+                }
+            }
+            
+            let i = i + 1;
+        }
+        
+        // If we have neighbors to align with
+        if (neighborCount > 0) {
+            // Calculate average velocity
+            let avgVelX = alignmentX / neighborCount;
+            let avgVelY = alignmentY / neighborCount;
+            
+            // Gradually align with group velocity
+            let velocityX = velocityX + ((avgVelX - velocityX) / 50);  // Was /20, now /50
+            let velocityY = velocityY + ((avgVelY - velocityY) / 50);
+        }
+        
+        return;
+    }
+
     method void update(Array joids, int currentJoidsCount) {
-        do calculateSeparation(joids, currentJoidsCount);
-        let positionX = positionX + velocityX;  // Simple movement!
+        do calculateSeparation(joids, currentJoidsCount);  // Rule 1: Avoid crowding
+        do calculateCohesion(joids, currentJoidsCount);    // Rule 2: Move towards center
+        do calculateAlignment(joids, currentJoidsCount);   // Rule 3: Match velocity
+        
+        // Apply movement
+        let positionX = positionX + velocityX;
         let positionY = positionY + velocityY;
+        
+        // Global speed limit (applied after all rules)
+        if (velocityX > 3) { let velocityX = 3; }
+        if (velocityX < -3) { let velocityX = -3; }
+        if (velocityY > 3) { let velocityY = 3; }
+        if (velocityY < -3) { let velocityY = -3; }
+        
         return;
     }
 
