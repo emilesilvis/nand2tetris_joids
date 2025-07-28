@@ -3,13 +3,46 @@ class JoidsController {
     field int currentJoidsCount;
     field int maxJoidsCount;
     field int currentJoidIndex;
+    field int seed; // Add seed for pseudorandom generation
 
     constructor JoidsController new(int maxJoids) {
         let maxJoidsCount = maxJoids;
         let currentJoidsCount = 0;
         let currentJoidIndex = 0;
+        let seed = 12345; // Initialize seed with better starting value
         let joids = Array.new(maxJoidsCount);
         return this;
+    }
+
+    // Simple pseudorandom number generator
+    method int nextRandom() {
+        let seed = (seed * 1103) + 12345;
+        let seed = seed & 32767; // Keep it within Jack's range
+        return seed;
+    }
+
+    // Generate random position X (0 to 511, then limit to screen)
+    method int randomPositionX() {
+        var int val;
+        let val = nextRandom() & 511; // 0 to 511
+        if (val > 480) { let val = val - 256; } // Keep within reasonable screen bounds
+        return val;
+    }
+
+    // Generate random position Y (0 to 255, then limit to screen)  
+    method int randomPositionY() {
+        var int val;
+        let val = nextRandom() & 255; // 0 to 255
+        if (val > 230) { let val = val - 128; } // Keep within reasonable screen bounds
+        return val;
+    }
+
+    // Generate random velocity (-4 to 4)
+    method int randomVelocity() {
+        var int val;
+        let val = (nextRandom() & 7) - 4; // 0-7 then subtract 4 = -4 to 3
+        if (val = -4) { let val = 4; } // Adjust to get -3 to 4 range
+        return val;
     }
 
     method boolean addJoid(int px, int py, int vx, int vy) {
@@ -19,6 +52,23 @@ class JoidsController {
             return true;
         }
         return false;
+    }
+
+    // Add new method for adding joids with random parameters
+    method void addRandomJoid() {
+        if (currentJoidsCount < maxJoidsCount) {
+            // Update seed with current count for more variation
+            let seed = seed + currentJoidsCount + 7;
+            
+            let joids[currentJoidsCount] = Joid.new(
+                randomPositionX(), 
+                randomPositionY(), 
+                randomVelocity(), 
+                randomVelocity()
+            );
+            let currentJoidsCount = currentJoidsCount + 1;
+        }
+        return;
     }
 
     method boolean removeJoid() {

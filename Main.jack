@@ -21,9 +21,7 @@ class Main {
             let action = interfaceController.checkInput();
 
             if (action = 1) { // ADD_JOID
-                do joidsController.addJoid(0, 0, 1, 4);
-                do joidsController.addJoid(100, 100, 2, 0);
-                do joidsController.addJoid(400, 100, -2, 3);
+                do joidsController.addRandomJoid();
                 do interfaceController.displayJoidCount(
                     joidsController.getCurrentJoidsCount(), 
                     joidsController.getMaxJoidsCount()
