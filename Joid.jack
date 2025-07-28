@@ -1,68 +1,124 @@
 class Joid {
     field int size;
-    field Vector2 position;
-    field Vector2 velocity;
+    field int positionX, positionY;
+    field int velocityX, velocityY;
 
-    constructor Joid new(Vector2 aposition, Vector2 avelocity) {
-        let position = aposition;
-        let velocity = avelocity;
+    constructor Joid new(int px, int py, int vx, int vy) {
+        let positionX = px;
+        let positionY = py;
+        let velocityX = vx;
+        let velocityY = vy;
         let size = 10;
         return this;
     }
 
-    method Vector2 getPosition() {
-        return position;
+    method int getPositionX() {
+        return positionX;
+    }
+
+    method int getPositionY() {
+        return positionY;
+    }
+
+    method void calculateSeparation(Array joids, int currentJoidsCount) {
+        var Joid otherJoid;
+        var int i, dx, dy, distance;
+        var int separationX, separationY;
+        var int minDistance, neighborCount;
+        
+        let minDistance = 15;
+        let separationX = 0;
+        let separationY = 0;
+        let neighborCount = 0;
+        
+        // Check all other joids
+        let i = 0;
+        while (i < currentJoidsCount) {
+            let otherJoid = joids[i];
+            
+            // Skip self
+            if (~(otherJoid = this)) {
+                // Calculate distance components
+                let dx = positionX - otherJoid.getPositionX();
+                let dy = positionY - otherJoid.getPositionY();
+                let distance = Math.abs(dx) + Math.abs(dy);  // Simple Manhattan distance
+                
+                // If too close, accumulate displacement vector
+                if (distance < minDistance) {
+                    let separationX = separationX + dx;
+                    let separationY = separationY + dy;
+                    let neighborCount = neighborCount + 1;
+                }
+            }
+            
+            let i = i + 1;
+        }
+        
+        // If we have neighbors to separate from
+        if (neighborCount > 0) {
+            // Average the displacement vectors
+            let separationX = separationX / neighborCount;
+            let separationY = separationY / neighborCount;
+            
+            // Set velocity to the averaged displacement (with scaling)
+            let velocityX = separationX / 10;
+            let velocityY = separationY / 10;
+            
+            // Limit maximum speed
+            if (velocityX > 2) { let velocityX = 2; }
+            if (velocityX < -2) { let velocityX = -2; }
+            if (velocityY > 2) { let velocityY = 2; }
+            if (velocityY < -2) { let velocityY = -2; }
+        }
+        
+        return;
     }
 
     method void update(Array joids, int currentJoidsCount) {
-        do position.add(velocity);
+        do calculateSeparation(joids, currentJoidsCount);
+        let positionX = positionX + velocityX;  // Simple movement!
+        let positionY = positionY + velocityY;
         return;
-    }    
+    }
 
     method void clear() {
         do Screen.setColor(false);
-        do Screen.drawRectangle(position.getX(),position.getY(),position.getX()+size,position.getY()+size);
-
+        do Screen.drawRectangle(positionX, positionY, positionX + size, positionY + size);
         return;
     }
 
     method void draw() {
-        // Draw
         do calculateScreenWrap();
         do Screen.setColor(true);
-        do Screen.drawRectangle(position.getX(),position.getY(),position.getX()+size,position.getY()+size);
-
+        do Screen.drawRectangle(positionX, positionY, positionX + size, positionY + size);
         return;
     }
 
     method void calculateScreenWrap() {
-        // Screen: 256 rows of 512 pixels, black and white
         // Horizontal wrap right edge
-        if ((position.getX()+size) > 512) {
-            do position.setX(0);
+        if ((positionX + size) > 512) {
+            let positionX = 0;
         }
 
         // Horizontal wrap left edge
-        if ((position.getX()) < 0) {
-            do position.setX(512-size);
+        if (positionX < 0) {
+            let positionX = 512 - size;
         }
 
         // Vertical wrap bottom edge
-        if ((position.getY()+size) > 256) {
-            do position.setY(0);
+        if ((positionY + size) > 256) {
+            let positionY = 0;
         }
 
         // Vertical wrap top edge
-        if ((position.getY()) < 0) {
-            do position.setY(256-size);
+        if (positionY < 0) {
+            let positionY = 256 - size;
         }
 
         return;
     }
 
     method void dispose() {
-        do position.dispose();
-        do velocity.dispose();
         do Memory.deAlloc(this);
         return;
     }

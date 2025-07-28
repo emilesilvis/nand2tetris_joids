@@ -10,7 +10,7 @@ class Main {
         
         // Create controllers
         let interfaceController = InterfaceController.new();
-        let joidsController = JoidsController.new(10);
+        let joidsController = JoidsController.new(30);
         let exit = false;
 
         // Display initial instructions
@@ -21,7 +21,9 @@ class Main {
             let action = interfaceController.checkInput();
 
             if (action = 1) { // ADD_JOID
+                do joidsController.addJoid(0, 0, 1, 1);
                 do joidsController.addJoid(100, 100, 2, 0);
+                do joidsController.addJoid(400, 100, -2, 0);
                 do interfaceController.displayJoidCount(
                     joidsController.getCurrentJoidsCount(), 
                     joidsController.getMaxJoidsCount()
