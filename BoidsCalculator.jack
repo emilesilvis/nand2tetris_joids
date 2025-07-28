@@ -1,5 +1,0 @@
-/** This class contains functions for implementation the Boids algorithms: https://en.wikipedia.org/wiki/Boids. For my specific implementation, see README.md. */
-
-class BoidsCalculator {
-   
-}
