@@ -33,11 +33,13 @@ class Joid {
         var int i, dx, dy, distance;
         var int separationX, separationY;
         var int minDistance, neighborCount;
+        var int separationForce;
         
-        let minDistance = 15;
+        let minDistance = 25;  // Increased separation distance
         let separationX = 0;
         let separationY = 0;
         let neighborCount = 0;
+        let separationForce = 8;  // Separation strength multiplier
         
         // Check all other joids
         let i = 0;
@@ -46,15 +48,22 @@ class Joid {
             
             // Skip self
             if (~(otherJoid = this)) {
-                // Calculate distance components
+                // Calculate displacement vector (from neighbor to self)
                 let dx = positionX - otherJoid.getPositionX();
                 let dy = positionY - otherJoid.getPositionY();
-                let distance = Math.abs(dx) + Math.abs(dy);  // Simple Manhattan distance
+                let distance = Math.abs(dx) + Math.abs(dy);  // Manhattan distance
                 
-                // If too close, accumulate displacement vector
+                // If within separation range, accumulate displacement vector
                 if (distance < minDistance) {
-                    let separationX = separationX + dx;
-                    let separationY = separationY + dy;
+                    // Weight displacement by inverse distance (closer = stronger force)
+                    if (distance > 0) {
+                        let separationX = separationX + ((dx * separationForce) / distance);
+                        let separationY = separationY + ((dy * separationForce) / distance);
+                    } else {
+                        // Handle edge case of identical positions
+                        let separationX = separationX + separationForce;
+                        let separationY = separationY + separationForce;
+                    }
                     let neighborCount = neighborCount + 1;
                 }
             }
@@ -64,19 +73,13 @@ class Joid {
         
         // If we have neighbors to separate from
         if (neighborCount > 0) {
-            // Average the displacement vectors
+            // Calculate average displacement vector
             let separationX = separationX / neighborCount;
             let separationY = separationY / neighborCount;
             
-            // Set velocity to the averaged displacement (with scaling)
-            let velocityX = separationX / 10;
-            let velocityY = separationY / 10;
-            
-            // Limit maximum speed
-            if (velocityX > 2) { let velocityX = 2; }
-            if (velocityX < -2) { let velocityX = -2; }
-            if (velocityY > 2) { let velocityY = 2; }
-            if (velocityY < -2) { let velocityY = -2; }
+            // Apply separation force to velocity
+            let velocityX = velocityX + (separationX / 15);
+            let velocityY = velocityY + (separationY / 15);
         }
         
         return;
@@ -87,14 +90,16 @@ class Joid {
         var int i, dx, dy, distance;
         var int cohesionX, cohesionY;
         var int cohesionRange, neighborCount;
-        var int avgX, avgY;
+        var int centerX, centerY;
+        var int cohesionForce;
         
-        let cohesionRange = 50;  // Look for neighbors within this range
+        let cohesionRange = 60;  // Look for neighbors within this range
         let cohesionX = 0;
         let cohesionY = 0;
         let neighborCount = 0;
+        let cohesionForce = 1;  // Cohesion strength
         
-        // Find all neighbors and calculate average position
+        // Find all neighbors and accumulate their positions
         let i = 0;
         while (i < currentJoidsCount) {
             let otherJoid = joids[i];
@@ -106,7 +111,7 @@ class Joid {
                 let dy = positionY - otherJoid.getPositionY();
                 let distance = Math.abs(dx) + Math.abs(dy);
                 
-                // If within cohesion range, include in group
+                // If within cohesion range, include in local flock
                 if (distance < cohesionRange) {
                     let cohesionX = cohesionX + otherJoid.getPositionX();
                     let cohesionY = cohesionY + otherJoid.getPositionY();
@@ -120,16 +125,16 @@ class Joid {
         // If we have neighbors to move towards
         if (neighborCount > 0) {
             // Calculate average position (center of mass)
-            let avgX = cohesionX / neighborCount;
-            let avgY = cohesionY / neighborCount;
+            let centerX = cohesionX / neighborCount;
+            let centerY = cohesionY / neighborCount;
             
-            // Calculate direction towards center
-            let dx = avgX - positionX;
-            let dy = avgY - positionY;
+            // Calculate displacement vector towards center of mass
+            let dx = centerX - positionX;
+            let dy = centerY - positionY;
             
-            // Apply cohesion force to velocity (gentle)
-            let velocityX = velocityX + (dx / 100);
-            let velocityY = velocityY + (dy / 100);
+            // Apply cohesion displacement to velocity with scaling
+            let velocityX = velocityX + ((dx * cohesionForce) / 80);
+            let velocityY = velocityY + ((dy * cohesionForce) / 80);
         }
         
         return;
@@ -141,13 +146,16 @@ class Joid {
         var int alignmentX, alignmentY;
         var int alignmentRange, neighborCount;
         var int avgVelX, avgVelY;
+        var int velDiffX, velDiffY;
+        var int alignmentForce;
         
-        let alignmentRange = 40;  // Look for neighbors within this range
+        let alignmentRange = 50;  // Look for neighbors within this range
         let alignmentX = 0;
         let alignmentY = 0;
         let neighborCount = 0;
+        let alignmentForce = 1;  // Alignment strength
         
-        // Find all neighbors and calculate average velocity
+        // Find all neighbors and accumulate their velocities
         let i = 0;
         while (i < currentJoidsCount) {
             let otherJoid = joids[i];
@@ -159,7 +167,7 @@ class Joid {
                 let dy = positionY - otherJoid.getPositionY();
                 let distance = Math.abs(dx) + Math.abs(dy);
                 
-                // If within alignment range, include in group
+                // If within alignment range, include in local flock
                 if (distance < alignmentRange) {
                     let alignmentX = alignmentX + otherJoid.getVelocityX();
                     let alignmentY = alignmentY + otherJoid.getVelocityY();
@@ -172,32 +180,43 @@ class Joid {
         
         // If we have neighbors to align with
         if (neighborCount > 0) {
-            // Calculate average velocity
+            // Calculate average velocity of local flock
             let avgVelX = alignmentX / neighborCount;
             let avgVelY = alignmentY / neighborCount;
             
-            // Gradually align with group velocity
-            let velocityX = velocityX + ((avgVelX - velocityX) / 50);  // Was /20, now /50
-            let velocityY = velocityY + ((avgVelY - velocityY) / 50);
+            // Calculate velocity difference vector (displacement in velocity space)
+            let velDiffX = avgVelX - velocityX;
+            let velDiffY = avgVelY - velocityY;
+            
+            // Apply alignment displacement to velocity with scaling
+            let velocityX = velocityX + ((velDiffX * alignmentForce) / 40);
+            let velocityY = velocityY + ((velDiffY * alignmentForce) / 40);
         }
         
         return;
     }
 
     method void update(Array joids, int currentJoidsCount) {
+        var int maxSpeed;
+        var int velocityMagnitude;
+        
+        let maxSpeed = 4;  // Maximum allowed speed
+        
+        // Apply Boids rules in order (each modifies velocity)
         do calculateSeparation(joids, currentJoidsCount);  // Rule 1: Avoid crowding
         do calculateCohesion(joids, currentJoidsCount);    // Rule 2: Move towards center
         do calculateAlignment(joids, currentJoidsCount);   // Rule 3: Match velocity
         
-        // Apply movement
+        // Limit velocity magnitude to prevent excessive speeds
+        let velocityMagnitude = Math.abs(velocityX) + Math.abs(velocityY);
+        if (velocityMagnitude > maxSpeed) {
+            let velocityX = (velocityX * maxSpeed) / velocityMagnitude;
+            let velocityY = (velocityY * maxSpeed) / velocityMagnitude;
+        }
+        
+        // Apply movement (position = position + velocity)
         let positionX = positionX + velocityX;
         let positionY = positionY + velocityY;
-        
-        // Global speed limit (applied after all rules)
-        if (velocityX > 3) { let velocityX = 3; }
-        if (velocityX < -3) { let velocityX = -3; }
-        if (velocityY > 3) { let velocityY = 3; }
-        if (velocityY < -3) { let velocityY = -3; }
         
         return;
     }

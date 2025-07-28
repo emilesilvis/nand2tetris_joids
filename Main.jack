@@ -10,7 +10,7 @@ class Main {
         
         // Create controllers
         let interfaceController = InterfaceController.new();
-        let joidsController = JoidsController.new(30);
+        let joidsController = JoidsController.new(15);
         let exit = false;
 
         // Display initial instructions
@@ -47,7 +47,7 @@ class Main {
             // Update and draw joids
             do joidsController.updateAndDrawJoids();
             
-            do Sys.wait(10);
+            do Sys.wait(5);
         }
 
         // Cleanup
