@@ -10,11 +10,18 @@ class Joid {
         return this;
     }
 
-    method void update(Array joids) {
+    method Vector2 getPosition() {
+        return position;
+    }
+
+    method void update(Array joids, int currentJoidsCount) {
         var Vector2 newPosition;
+        var Vector2 foo;
         let newPosition = position.add(velocity);
         do position.dispose();
         let position = newPosition;
+        let foo = BoidsCalculator.calculateSeparation(this, joids, currentJoidsCount);
+        do foo.dispose();
         return;
     }
 

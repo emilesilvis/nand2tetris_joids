@@ -42,7 +42,7 @@ class JoidsController {
         while (i < currentJoidsCount) {
             let joid = joids[i];
             do joid.clear();
-            do joid.update(joids);
+            do joid.update(joids, currentJoidsCount);
             do joid.draw();
             let i = i + 1;
         }

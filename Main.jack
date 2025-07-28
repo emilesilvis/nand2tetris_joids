@@ -45,7 +45,7 @@ class Main {
             // Update and draw joids
             do joidsController.updateAndDrawJoids();
             
-            do Sys.wait(1);
+            do Sys.wait(5);
         }
 
         // Cleanup
